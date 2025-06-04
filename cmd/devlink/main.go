@@ -4,13 +4,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/itsTony4dev/devlink/internal/config"
-	"github.com/itsTony4dev/devlink/internal/routes"
+	"devlink/internal/config"
+	"devlink/internal/db"
+	"devlink/internal/routes"
 )
 
 func main() {
-	config.LoadEnv() // Load environment variables
+	config.LoadEnv() 
 	port := config.GetEnv("PORT", "8080")
+
+	database.InitDB()
 
 	r := routes.SetupRouter()
 	log.Printf("Server is running on port %s", port)
