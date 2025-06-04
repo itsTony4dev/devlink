@@ -1,0 +1,8 @@
+tmp/
+.env
+/bin
+/pkg
+/vendor
+*.exe
+*.test
+*.prof
