@@ -31,7 +31,7 @@ devlink/
 ### 1. Clone the Repository
 
 
-git clone https://github.com/yourusername/devlink.git
+git clone https://github.com/itsTony4dev/devlink.git
 cd devlink
 2. Set Up Environment Variables
 Create a .env file at the root:
