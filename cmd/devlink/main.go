@@ -13,7 +13,7 @@ func main() {
 	config.LoadEnv() 
 	port := config.GetEnv("PORT", "8080")
 
-	database.InitDB()
+	db.InitDB()
 
 	r := routes.SetupRouter()
 	log.Printf("Server is running on port %s", port)
