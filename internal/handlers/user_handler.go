@@ -22,9 +22,6 @@ func NewUserHandler(userRepository *repository.UserRepository) *UserHandler {
 }
 
 func (h *UserHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement user registration logic
-	// This function will handle user registration, including validation, hashing, etc.
-	// It will use the userRepository to interact with the database.
 	w.Header().Set("Content-Type", "application/json")
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
