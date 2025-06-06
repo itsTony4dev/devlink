@@ -6,18 +6,25 @@ import (
 
 	"devlink/internal/config"
 	"devlink/internal/db"
+	"devlink/internal/handlers"
+	"devlink/internal/repository"
 	"devlink/internal/routes"
 )
 
 func main() {
-	config.LoadEnv() 
+	config.LoadEnv()
 	port := config.GetEnv("PORT", "8080")
 
-	db.InitDB()
+	dbConn := db.InitDB()
 
-	r := routes.SetupRouter()
+	userRepo := repository.NewUserRepository(dbConn)
+
+	handlers := handlers.NewHandlersContainer(userRepo)
+
+	r := routes.SetupRouter(handlers)
+
 	log.Printf("Server is running on port %s", port)
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 	log.Println("Server stopped")
