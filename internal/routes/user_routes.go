@@ -2,6 +2,7 @@ package routes
 
 import (
 	"devlink/internal/handlers"
+	"devlink/internal/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -12,10 +13,13 @@ func RegisterUserRoutes(router *mux.Router, userHandler *handlers.UserHandler, a
 	userRouter.HandleFunc("/register", authHandler.RegisterUserHandler).Methods("POST")
 	userRouter.HandleFunc("/login", authHandler.LoginUserHandler).Methods("POST")
 	userRouter.HandleFunc("/logout", authHandler.LogoutUserHandler).Methods("POST")
-
+	
+	// Protected routes for authenticated users
+	protected := userRouter.NewRoute().Subrouter()
 	// User-related routes
-	userRouter.HandleFunc("/", userHandler.GetAllUsersHandler).Methods("GET")
-	userRouter.HandleFunc("/{id}", userHandler.GetUserByIDHandler).Methods("GET")
-	userRouter.HandleFunc("/{id}", userHandler.UpdateUserHandler).Methods("PUT")
-	userRouter.HandleFunc("/{id}", userHandler.DeleteUserHandler).Methods("DELETE")
+	protected.Use(middleware.JWTAuthMiddleware)
+	protected.HandleFunc("/", userHandler.GetAllUsersHandler).Methods("GET")
+	protected.HandleFunc("/{id}", userHandler.GetUserByIDHandler).Methods("GET")
+	protected.HandleFunc("/{id}", userHandler.UpdateUserHandler).Methods("PUT")
+	protected.HandleFunc("/{id}", userHandler.DeleteUserHandler).Methods("DELETE")
 }

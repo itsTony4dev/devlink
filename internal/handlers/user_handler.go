@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"devlink/internal/middleware"
 	"devlink/internal/models"
 	"devlink/internal/repository"
 	"encoding/json"
@@ -52,6 +53,10 @@ func (h *UserHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 
 func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	if !middleware.IsUserSelf(r, vars["id"]) {
+		http.Error(w, "Forbidden: cannot delete another user", http.StatusForbidden)
+		return
+	}
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
@@ -77,6 +82,11 @@ func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) 
 
 func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	if !middleware.IsUserSelf(r, vars["id"]) {
+		http.Error(w, "Forbidden: cannot delete another user", http.StatusForbidden)
+		return
+	}
+
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
