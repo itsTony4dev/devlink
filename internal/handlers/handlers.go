@@ -10,5 +10,6 @@ type HandlersContainer struct {
 func NewHandlersContainer(userRepository *repository.UserRepository) *HandlersContainer {
 	return &HandlersContainer{
 		UserHandler: NewUserHandler(userRepository),
+		AuthHandler: NewAuthHandler(userRepository),
 	}
 }
