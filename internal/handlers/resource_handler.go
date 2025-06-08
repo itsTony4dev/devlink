@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"gorm.io/datatypes"
 )
 
 type ResourceHandler struct {
@@ -37,12 +38,19 @@ func (h *ResourceHandler) CreateResourceHandler(w http.ResponseWriter, r *http.R
 	}
 	userID := uint(claims["user_id"].(float64))
 
+	// Marshal tags to JSON
+	tagsJSON, err := json.Marshal(createReq.Tags)
+	if err != nil {
+		dto.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	// Create resource
 	resource := &models.Resource{
 		Title:       createReq.Title,
 		URL:         createReq.URL,
 		Description: createReq.Description,
-		Tags:        createReq.Tags,
+		Tags:        datatypes.JSON(tagsJSON),
 		UserID:      userID,
 	}
 
@@ -115,7 +123,7 @@ func (h *ResourceHandler) GetUserResourcesHandler(w http.ResponseWriter, r *http
 		Response: dto.NewSuccessResponse(dto.ResourcesToResponse(resources), "Resources retrieved successfully"),
 		Page:     page,
 		PageSize: pageSize,
-		Total:    total,
+		Total:    int(total),
 	}
 
 	dto.WriteJSON(w, http.StatusOK, response)
@@ -166,7 +174,12 @@ func (h *ResourceHandler) UpdateResourceHandler(w http.ResponseWriter, r *http.R
 		resource.Description = updateReq.Description
 	}
 	if updateReq.Tags != nil {
-		resource.Tags = updateReq.Tags
+		tagsJSON, err := json.Marshal(updateReq.Tags)
+		if err != nil {
+			dto.WriteError(w, http.StatusInternalServerError, err)
+			return
+		}
+		resource.Tags = datatypes.JSON(tagsJSON)
 	}
 
 	if err := h.repo.UpdateResource(resource); err != nil {
@@ -251,7 +264,7 @@ func (h *ResourceHandler) SearchResourcesHandler(w http.ResponseWriter, r *http.
 		Response: dto.NewSuccessResponse(dto.ResourcesToResponse(resources), "Resources retrieved successfully"),
 		Page:     page,
 		PageSize: pageSize,
-		Total:    total,
+		Total:    int(total),
 	}
 
 	dto.WriteJSON(w, http.StatusOK, response)
@@ -303,7 +316,7 @@ func (h *ResourceHandler) GetResourcesByTagsHandler(w http.ResponseWriter, r *ht
 		Response: dto.NewSuccessResponse(dto.ResourcesToResponse(resources), "Resources retrieved successfully"),
 		Page:     page,
 		PageSize: pageSize,
-		Total:    total,
+		Total:    int(total),
 	}
 
 	dto.WriteJSON(w, http.StatusOK, response)

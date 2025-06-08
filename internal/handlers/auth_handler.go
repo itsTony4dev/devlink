@@ -77,7 +77,7 @@ func (h *AuthHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	dto.WriteSuccess(w, http.StatusCreated, map[string]interface{}{
-		"user":  user.ToResponse(),
+		"user":  dto.UserToResponse(&user),
 		"token": token,
 	}, "User registered successfully")
 }
@@ -90,8 +90,8 @@ func (h *AuthHandler) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate email format
-	user := models.User{Email: loginReq.Email}
-	if err := user.ValidateEmail(); err != nil {
+	userTemp := models.User{Email: loginReq.Email}
+	if err := userTemp.ValidateEmail(); err != nil {
 		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -117,7 +117,7 @@ func (h *AuthHandler) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dto.WriteSuccess(w, http.StatusOK, map[string]interface{}{
-		"user":  user.ToResponse(),
+		"user":  dto.UserToResponse(user),
 		"token": token,
 	}, "Login successful")
 }

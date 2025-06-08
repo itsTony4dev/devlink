@@ -1,7 +1,6 @@
 package models
 
 import (
-	"devlink/internal/dto"
 	"regexp"
 	"unicode"
 
@@ -64,22 +63,6 @@ func (u *User) ValidateUsername() error {
 	return nil
 }
 
-func (u *User) ToResponse() dto.UserResponse {
-	return dto.UserResponse{
-		ID:       u.ID,
-		Username: u.Username,
-		Email:    u.Email,
-	}
-}
-
-func UsersToResponse(users []User) []dto.UserResponse {
-	responses := make([]dto.UserResponse, len(users))
-	for i, user := range users {
-		responses[i] = user.ToResponse()
-	}
-	return responses
-}
-
 // Custom errors
 var (
 	ErrInvalidPassword     = &ValidationError{Message: "Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character"}
@@ -88,6 +71,7 @@ var (
 	ErrEmailExists         = &ValidationError{Message: "Email already registered"}
 	ErrInvalidCredentials  = &ValidationError{Message: "Invalid email or password"}
 	ErrForbidden          = &ValidationError{Message: "You don't have permission to perform this action"}
+	ErrInvalidRequest     = &ValidationError{Message: "Invalid request"}
 )
 
 type ValidationError struct {

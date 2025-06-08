@@ -1,5 +1,10 @@
 package dto
 
+import (
+	"devlink/internal/models"
+	"encoding/json"
+)
+
 type ResourceResponse struct {
 	ID          uint     `json:"id"`
 	Title       string   `json:"title"`
@@ -24,12 +29,17 @@ type UpdateResourceRequest struct {
 }
 
 func ResourceToResponse(resource *models.Resource) ResourceResponse {
+	var tags []string
+	if resource.Tags != nil {
+		json.Unmarshal(resource.Tags, &tags)
+	}
+
 	return ResourceResponse{
 		ID:          resource.ID,
 		Title:       resource.Title,
 		URL:         resource.URL,
 		Description: resource.Description,
-		Tags:        resource.Tags,
+		Tags:        tags,
 		UserID:      resource.UserID,
 	}
 }

@@ -36,7 +36,7 @@ func (h *UserHandler) GetUserByIDHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	dto.WriteSuccess(w, http.StatusOK, user.ToResponse(), "User retrieved successfully")
+	dto.WriteSuccess(w, http.StatusOK, dto.UserToResponse(user), "User retrieved successfully")
 }
 
 func (h *UserHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,10 +60,10 @@ func (h *UserHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	response := dto.PaginatedResponse{
-		Response: dto.NewSuccessResponse(models.UsersToResponse(users), "Users retrieved successfully"),
+		Response: dto.NewSuccessResponse(dto.UsersToResponse(users), "Users retrieved successfully"),
 		Page:     page,
 		PageSize: pageSize,
-		Total:    total,
+		Total:    int(total),
 	}
 
 	dto.WriteJSON(w, http.StatusOK, response)
@@ -127,7 +127,7 @@ func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dto.WriteSuccess(w, http.StatusOK, user.ToResponse(), "User updated successfully")
+	dto.WriteSuccess(w, http.StatusOK, dto.UserToResponse(user), "User updated successfully")
 }
 
 func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {

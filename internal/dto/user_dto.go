@@ -1,5 +1,7 @@
 package dto
 
+import "devlink/internal/models"
+
 type UserResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
@@ -26,4 +28,20 @@ type UpdateUserRequest struct {
 type PaginationParams struct {
 	Page     int `json:"page" validate:"min=1"`
 	PageSize int `json:"pageSize" validate:"min=1,max=100"`
+}
+
+func UserToResponse(user *models.User) UserResponse {
+	return UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}
+}
+
+func UsersToResponse(users []models.User) []UserResponse {
+	responses := make([]UserResponse, len(users))
+	for i, user := range users {
+		responses[i] = UserToResponse(&user)
+	}
+	return responses
 }
