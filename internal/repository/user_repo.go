@@ -38,6 +38,24 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
+func (r *UserRepository) GetAllUsersPaginated(page, pageSize int) ([]models.User, int64, error) {
+	var users []models.User
+	var total int64
+
+	// Get total count
+	if err := r.db.Model(&models.User{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	offset := (page - 1) * pageSize
+	if err := r.db.Offset(offset).Limit(pageSize).Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}
+
 func (r *UserRepository) CreateUser(user *models.User) error {
 	return r.db.Create(user).Error
 }

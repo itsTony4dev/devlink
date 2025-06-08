@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"devlink/internal/dto"
 	"devlink/internal/models"
 	"devlink/internal/repository"
 	"devlink/internal/utils"
@@ -21,111 +22,106 @@ func NewAuthHandler(userRepository *repository.UserRepository) *AuthHandler {
 }
 
 func (h *AuthHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	var registerReq dto.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&registerReq); err != nil {
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
+	}
+
+	// Create user model from request
+	user := models.User{
+		Username: registerReq.Username,
+		Email:    registerReq.Email,
+		Password: registerReq.Password,
 	}
 
 	// Validate user input
 	if err := user.ValidateUsername(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 	if err := user.ValidateEmail(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 	if err := user.ValidatePassword(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Check if user already exists
 	if existingUser, _ := h.repo.GetByEmail(user.Email); existingUser != nil {
-		http.Error(w, "Email already registered", http.StatusConflict)
+		dto.WriteError(w, http.StatusConflict, models.ErrEmailExists)
 		return
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		dto.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 	user.Password = string(hashedPassword)
 
 	// Create user
 	if err := h.repo.CreateUser(&user); err != nil {
-		http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		dto.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email, user.Username)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		dto.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	dto.WriteSuccess(w, http.StatusCreated, map[string]interface{}{
 		"user":  user.ToResponse(),
 		"token": token,
-	})
+	}, "User registered successfully")
 }
 
 func (h *AuthHandler) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var loginData struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&loginData); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	var loginReq dto.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Validate email format
-	user := models.User{Email: loginData.Email}
+	user := models.User{Email: loginReq.Email}
 	if err := user.ValidateEmail(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		dto.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Get user from database
-	user, err := h.repo.GetByEmail(loginData.Email)
+	user, err := h.repo.GetByEmail(loginReq.Email)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		dto.WriteError(w, http.StatusUnauthorized, models.ErrInvalidCredentials)
 		return
 	}
 
 	// Verify password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginData.Password)); err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginReq.Password)); err != nil {
+		dto.WriteError(w, http.StatusUnauthorized, models.ErrInvalidCredentials)
 		return
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateJWT(user.ID, user.Email, user.Username)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		dto.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	dto.WriteSuccess(w, http.StatusOK, map[string]interface{}{
 		"user":  user.ToResponse(),
 		"token": token,
-	})
+	}, "Login successful")
 }
 
 func (h *AuthHandler) LogoutUserHandler(w http.ResponseWriter, r *http.Request) {
-	// For stateless JWT authentication, logout is handled on the client side.
-	// Here we can just return a success message.
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "User logged out successfully",
-	})
+	dto.WriteSuccess(w, http.StatusOK, nil, "User logged out successfully")
 }
