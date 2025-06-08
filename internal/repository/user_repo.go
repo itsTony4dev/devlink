@@ -65,5 +65,5 @@ func (r *UserRepository) UpdateUser(user *models.User) error {
 }
 
 func (r *UserRepository) DeleteUser(userID uint) error {
-	return r.db.Delete(&models.User{}, userID).Error
+	return r.db.Unscoped().Delete(&models.User{}, userID).Error
 }

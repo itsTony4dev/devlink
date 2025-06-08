@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -140,6 +141,16 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		dto.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	_, err = h.repo.GetByID(uint(userID))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			dto.WriteError(w, http.StatusNotFound, err)
+			return
+		}
+		dto.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
