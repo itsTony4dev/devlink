@@ -14,8 +14,9 @@ import (
 func main() {
 	config.LoadEnv()
 	port := config.GetEnv("PORT", "8080")
+	dbURL := config.GetEnv("DB_URL", "devlink.db")
 
-	dbConn := db.InitDB()
+	dbConn := db.InitDB(dbURL)
 
 	userRepo := repository.NewUserRepository(dbConn)
 	resourceRepo := repository.NewResourceRepository(dbConn)

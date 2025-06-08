@@ -77,6 +77,7 @@ devlink/
    ```env
    PORT=8080
    JWT_SECRET=your_jwt_secret
+   DB_URL=devlink.db
    ```
 
 3. Install dependencies:
