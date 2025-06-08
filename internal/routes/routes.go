@@ -33,5 +33,8 @@ func SetupRouter(h *handlers.HandlersContainer) *mux.Router {
 	// Register user routes
 	RegisterUserRoutes(r, h.UserHandler, h.AuthHandler)
 
+	// Register resource routes
+	RegisterResourceRoutes(r, h.ResourceHandler)
+
 	return r
 }

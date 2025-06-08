@@ -18,8 +18,9 @@ func main() {
 	dbConn := db.InitDB()
 
 	userRepo := repository.NewUserRepository(dbConn)
+	resourceRepo := repository.NewResourceRepository(dbConn)
 
-	handlers := handlers.NewHandlersContainer(userRepo)
+	handlers := handlers.NewHandlersContainer(userRepo, resourceRepo)
 
 	r := routes.SetupRouter(handlers)
 
