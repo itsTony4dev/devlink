@@ -20,3 +20,11 @@ func (u *User) ToResponse() dto.UserResponse {
 		Email:    u.Email,
 	}
 }
+
+func UsersToResponse(users []User) []dto.UserResponse {
+    responses := make([]dto.UserResponse, len(users))
+    for i, user := range users {
+        responses[i] = user.ToResponse()
+    }
+    return responses
+}

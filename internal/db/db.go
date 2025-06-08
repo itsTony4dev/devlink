@@ -10,16 +10,16 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() {
+func InitDB() *gorm.DB {
 	var err error
 	DB, err = gorm.Open(sqlite.Open("devlink.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect to database: ", err)
 	}
 
-
 	err = DB.AutoMigrate(&models.User{}, &models.Resource{})
 	if err != nil {
 		log.Fatal("failed to migrate database: ", err)
 	}
+	return DB
 }
