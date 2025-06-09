@@ -48,10 +48,20 @@ func (h *ResourceHandler) CreateResourceHandler(w http.ResponseWriter, r *http.R
 	// Create resource
 	resource := &models.Resource{
 		Title:       createReq.Title,
+		Type:        createReq.Type,
 		URL:         createReq.URL,
+		Category:    createReq.Category,
 		Description: createReq.Description,
 		Tags:        datatypes.JSON(tagsJSON),
+		Language:    createReq.Language,
+		CodeContent: createReq.CodeContent,
 		UserID:      userID,
+	}
+
+	// Validate resource based on type
+	if err := resource.Validate(); err != nil {
+		dto.WriteError(w, http.StatusBadRequest, err)
+		return
 	}
 
 	if err := h.repo.CreateResource(resource); err != nil {
@@ -167,8 +177,14 @@ func (h *ResourceHandler) UpdateResourceHandler(w http.ResponseWriter, r *http.R
 	if updateReq.Title != "" {
 		resource.Title = updateReq.Title
 	}
+	if updateReq.Type != "" {
+		resource.Type = updateReq.Type
+	}
 	if updateReq.URL != "" {
 		resource.URL = updateReq.URL
+	}
+	if updateReq.Category != "" {
+		resource.Category = updateReq.Category
 	}
 	if updateReq.Description != "" {
 		resource.Description = updateReq.Description
@@ -180,6 +196,18 @@ func (h *ResourceHandler) UpdateResourceHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 		resource.Tags = datatypes.JSON(tagsJSON)
+	}
+	if updateReq.Language != "" {
+		resource.Language = updateReq.Language
+	}
+	if updateReq.CodeContent != "" {
+		resource.CodeContent = updateReq.CodeContent
+	}
+
+	// Validate resource based on type
+	if err := resource.Validate(); err != nil {
+		dto.WriteError(w, http.StatusBadRequest, err)
+		return
 	}
 
 	if err := h.repo.UpdateResource(resource); err != nil {
@@ -320,4 +348,4 @@ func (h *ResourceHandler) GetResourcesByTagsHandler(w http.ResponseWriter, r *ht
 	}
 
 	dto.WriteJSON(w, http.StatusOK, response)
-} 
+}

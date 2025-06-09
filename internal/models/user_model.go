@@ -65,11 +65,11 @@ func (u *User) ValidateUsername() error {
 
 // Custom errors
 var (
-	ErrInvalidPassword     = &ValidationError{Message: "Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character"}
-	ErrInvalidEmail        = &ValidationError{Message: "Invalid email format"}
-	ErrInvalidUsername     = &ValidationError{Message: "Username must be 3-50 characters long and contain only letters, numbers, and underscores"}
-	ErrEmailExists         = &ValidationError{Message: "Email already registered"}
-	ErrInvalidCredentials  = &ValidationError{Message: "Invalid email or password"}
+	ErrInvalidPassword    = &ValidationError{Message: "Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character"}
+	ErrInvalidEmail       = &ValidationError{Message: "Invalid email format"}
+	ErrInvalidUsername    = &ValidationError{Message: "Username must be 3-50 characters long and contain only letters, numbers, and underscores"}
+	ErrEmailExists        = &ValidationError{Message: "Email already registered"}
+	ErrInvalidCredentials = &ValidationError{Message: "Invalid email or password"}
 	ErrForbidden          = &ValidationError{Message: "You don't have permission to perform this action"}
 	ErrInvalidRequest     = &ValidationError{Message: "Invalid request"}
 )
