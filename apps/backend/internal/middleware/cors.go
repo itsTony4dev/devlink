@@ -19,13 +19,20 @@ func NewCORSMiddleware(origins, methods, headers []string) *CORSMiddleware {
 func (c *CORSMiddleware) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin != "" {
-			for _, allowedOrigin := range c.allowedOrigins {
-				if origin == allowedOrigin {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					break
-				}
+
+		// Check if the origin is allowed
+		allowed := false
+		for _, allowedOrigin := range c.allowedOrigins {
+			if origin == allowedOrigin {
+				allowed = true
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				break
 			}
+		}
+
+		if !allowed {
+			http.Error(w, "Not allowed", http.StatusForbidden)
+			return
 		}
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -33,6 +40,7 @@ func (c *CORSMiddleware) CORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Max-Age", "86400") // 24 hours
 
+		// Handle preflight requests
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -40,4 +48,4 @@ func (c *CORSMiddleware) CORS(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-} 
+}
